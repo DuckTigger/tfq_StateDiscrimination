@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from encode_state import EncodeState
 from input_circuits import InputCircuits
-from loss import DiscrimintaionLoss
+from loss import DiscriminationLoss
 
 
 def main():
@@ -11,9 +11,9 @@ def main():
     circuits = InputCircuits(n)
     train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits()
     encoder = EncodeState(n)
-    encoding_model = encoder.encode_state(train_circuits)
+    encoding_model = encoder.encode_state()
 
-    loss = DiscrimintaionLoss(0.5, 0.5)
+    loss = DiscriminationLoss(0.5, 0.5)
     loss_fn = loss.discrimination_loss
     encoding_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
                            loss=loss_fn)
