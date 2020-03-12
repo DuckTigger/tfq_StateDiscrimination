@@ -28,12 +28,15 @@ class EncodeState:
                              cirq.Y(qubit)**symbols[1],
                              cirq.Z(qubit)**symbols[2]])
 
-    def encode_state(self, input_circuit: cirq.Circuit):
+    def ent_ops(self):
+        return cirq.Circuit(cirq.CNOT(q1, q2) for q1, q2 in zip(self.qubits, self.qubits[1:] + [self.qubits[0]]))
+
+    def encode_state(self):
         symbols = sy.symbols('enc0:{}'.format(4 * self.n))
         encoding_circuit = self.create_encoding_layers(symbols)
         encoding_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
-        encoding_layer = tfq.layers.AddCircuit()(encoding_input, prepend=input_circuit)
-        readout_ops = [cirq.Z(self.qubits[2]), cirq.Z(self.qubits[3])]
+        encoding_layer = tfq.layers.AddCircuit()(encoding_input, prepend=self.ent_ops())
+        readout_ops = cirq.PauliString(1, cirq.Z(self.qubits[2]), cirq.Z(self.qubits[3]))
         encoding_model = tfq.layers.PQC(encoding_circuit, readout_ops)(encoding_layer)
         return tf.keras.Model(inputs=[encoding_input], outputs=[encoding_model])
 

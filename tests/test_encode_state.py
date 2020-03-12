@@ -1,11 +1,12 @@
 import unittest
 import cirq
 import numpy as np
-# import tensorflow as tf
-# import tensorflow_quantum as tfq
+import tensorflow as tf
+import tensorflow_quantum as tfq
 import sympy as sy
 
 from encode_state import EncodeState
+from input_circuits import InputCircuits
 
 
 class TestEncodeState(unittest.TestCase):
@@ -28,11 +29,16 @@ class TestEncodeState(unittest.TestCase):
         np.testing.assert_array_almost_equal(sim.simulate(circuit, param_resolver=resolve).final_state, test.final_wavefunction())
 
     def test_encode_state(self):
-        n = 6
-        state = cirq.testing.random_superposition(2**n)
+        n = 4
         encoder = EncodeState(n)
-        encoder.encode_state(state)
-
+        symbols = sy.symbols('enc0:{}'.format(4 * n))
+        circuit = encoder.create_encoding_layers(symbols)
+        readout = cirq.PauliString(1, cirq.Z(encoder.qubits[2]), cirq.Z(encoder.qubits[3]))
+        enc = tfq.layers.PQC(circuit, readout)
+        circuits = InputCircuits(n)
+        data = tfq.convert_to_tensor([circuits.create_a(0.5), circuits.create_b(0.3, 0)])
+        res = enc(data)
+        print(res)
 
 
 if __name__ == '__main__':
