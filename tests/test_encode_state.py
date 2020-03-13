@@ -31,18 +31,14 @@ class TestEncodeState(unittest.TestCase):
     def test_encode_state(self):
         n = 4
         encoder = EncodeState(n)
-        symbols = sy.symbols(['enc{}'.format(i) for i in range(4 * n)])
+        symbols = sy.symbols('enc0:{}'.format(4 * n))
         circuit = encoder.create_encoding_layers(symbols)
         readout = cirq.PauliString(1, cirq.Z(encoder.qubits[2]), cirq.Z(encoder.qubits[3]))
-        sample_layer = tfq.layers.Sample()
-        params = [[np.random.rand() for _ in range(len(symbols))]]
-        output = sample_layer(circuit, symbol_names=symbols, symbol_values=params, repetitions=3)
-        print(output)
-        # enc = tfq.layers.PQC(circuit, readout)
-        # circuits = InputCircuits(n)
-        # data = tfq.convert_to_tensor([circuits.create_a(0.5), circuits.create_b(0.3, 0)])
-        # res = enc(data)
-        # print(res)
+        enc = tfq.layers.PQC(circuit, readout)
+        circuits = InputCircuits(n)
+        data = tfq.convert_to_tensor([circuits.create_a(0.5), circuits.create_b(0.3, 0)])
+        res = enc(data)
+        print(res)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow_quantum as tfq
 import matplotlib.pyplot as plt
 
 from encode_state import EncodeState
@@ -11,19 +12,20 @@ def main():
     circuits = InputCircuits(n)
     train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits()
     encoder = EncodeState(n)
-    encoding_model = encoder.encode_state()
+    pqc_model = encoder.encode_state_PQC()
+    model = pqc_model
 
     loss = DiscriminationLoss(0.5, 0.5)
     loss_fn = loss.discrimination_loss
-    encoding_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
-                           loss=loss_fn)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
+                  loss=loss_fn)
 
-    history = encoding_model.fit(x=train_circuits,
-                                 y=train_labels,
-                                 batch_size=10,
-                                 epochs=2,
-                                 verbose=1,
-                                 validation_data=(test_circuits, test_labels))
+    history = model.fit(x=train_circuits,
+                        y=train_labels,
+                        batch_size=10,
+                        epochs=2,
+                        verbose=1,
+                        validation_data=(test_circuits, test_labels))
     plt.plot(history.history['loss'], label='Training')
     plt.show()
 
