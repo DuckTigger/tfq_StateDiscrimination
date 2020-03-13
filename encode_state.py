@@ -19,7 +19,7 @@ class EncodeState:
         for i, qubit in enumerate(self.qubits):
             circuit.append(self.one_qubit_unitary(qubit, symbols[3 * i: 3 * i + 3]))
         for i, (qubit_0, qubit_1) in enumerate(zip(self.qubits, self.qubits[1:] + [self.qubits[0]])):
-            circuit.append(cirq.CX(qubit_0, qubit_1)**symbols[3 * self.n + i])
+            circuit.append(cirq.CNotPowGate(exponent=symbols[3 * self.n + i]).on(qubit_0, qubit_1))
         return circuit
 
     @staticmethod
