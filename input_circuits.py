@@ -10,7 +10,7 @@ class InputCircuits:
         self.qubits = cirq.GridQubit.rect(int(n_qubits/2), 2)
         self.n = n_qubits
 
-    def create_discrimination_circuits(self, total_states: int = 1000, prop_a: float = 0.5,
+    def create_discrimination_circuits(self, total_states: int = 1000,
                                      mu_a: float = 0.5, mu_b: float = 0.5, sigma_a: float = 0.01,
                                      sigma_b: float = 0.01):
         a_dist = truncnorm.rvs((0 - mu_a) / sigma_a, (1 - mu_a) / sigma_a, mu_a, sigma_a,
@@ -25,7 +25,7 @@ class InputCircuits:
             if label:
                 circuits.append(self.create_a(a_dist[i]))
             else:
-                sign = np.random.choice([0,1])
+                sign = np.random.choice([0, 1])
                 circuits.append(self.create_b(b_dist[i], sign))
 
         split = int(len(circuits) * 0.7)
