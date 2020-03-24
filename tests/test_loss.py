@@ -2,7 +2,7 @@ import unittest
 import tensorflow as tf
 import tensorflow_quantum as tfq
 import numpy as np
-import sympy as sy
+import sympy as sp
 import cirq
 
 from loss import DiscriminationLoss

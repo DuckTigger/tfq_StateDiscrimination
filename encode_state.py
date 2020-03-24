@@ -1,6 +1,6 @@
 import cirq
 import numpy as np
-import sympy as sy
+import sympy as sp
 import tensorflow_quantum as tfq
 import tensorflow as tf
 
@@ -12,9 +12,9 @@ class EncodeState:
         self.n = n_qubits
         self.n_data = n_data_qubits
 
-    def create_encoding_circuit(self, symbols: sy.Symbol = None):
+    def create_encoding_circuit(self, symbols: sp.Symbol = None):
         if symbols is None:
-            symbols = sy.symbols('enc0:{}'.format(4 * self.n))
+            symbols = sp.symbols('enc0:{}'.format(4 * self.n))
         circuit = cirq.Circuit()
         circuit.append(cirq.H.on_each(self.qubits))
         for i, qubit in enumerate(self.qubits):
@@ -25,7 +25,7 @@ class EncodeState:
         circuit.append(cirq.measure(self.qubits[2], self.qubits[3], key='m'))
         return circuit
 
-    def create_layers(self, symbols: sy.Symbol, level: int) -> cirq.Circuit:
+    def create_layers(self, symbols: sp.Symbol, level: int) -> cirq.Circuit:
         layer_qubits = self.qubits[:-level] if level else self.qubits
         n = len(layer_qubits)
         circuit = cirq.Circuit()
@@ -38,7 +38,7 @@ class EncodeState:
         return circuit
 
     @staticmethod
-    def one_qubit_unitary(qubit: cirq.Qid, symbols: sy.Symbol) -> cirq.Circuit:
+    def one_qubit_unitary(qubit: cirq.Qid, symbols: sp.Symbol) -> cirq.Circuit:
         return cirq.Circuit([cirq.X(qubit)**symbols[0],
                              cirq.Y(qubit)**symbols[1],
                              cirq.Z(qubit)**symbols[2]])
@@ -49,12 +49,12 @@ class EncodeState:
     def discrimination_circuit(self):
         output = cirq.Circuit()
         for i in range(self.n - self.n_data):
-            symbols = sy.symbols('layer{}_0:{}'.format(i, 4 * self.n - i))
+            symbols = sp.symbols('layer{}_0:{}'.format(i, 4 * self.n - i))
             output.append(self.create_layers(symbols, i))
         return output
 
     def encode_state_PQC(self):
-        symbols = sy.symbols('enc0:{}'.format(4 * self.n))
+        symbols = sp.symbols('enc0:{}'.format(4 * self.n))
         encoding_circuit = self.create_encoding_circuit(symbols)
         encoding_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
         encoding_layer = tfq.layers.AddCircuit()(encoding_input, prepend=self.ent_ops())
