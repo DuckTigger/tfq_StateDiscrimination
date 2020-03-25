@@ -576,7 +576,8 @@ class TestEncodeState(unittest.TestCase):
                                              cirq.GridQubit(1, 0), cirq.GridQubit(0, 0)), control_values=((1,),)),
             ]), cirq.Moment(operations=[
                 cirq.MeasurementGate(1, 'm1', ()).on(cirq.GridQubit(1, 0)),
-            ])])
+            ])
+        ])
         print(test.to_text_diagram(transpose=True))
         cirq.testing.assert_same_circuits(test, true)
 

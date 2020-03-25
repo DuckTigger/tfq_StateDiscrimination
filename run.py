@@ -14,7 +14,8 @@ def main():
     encoder = EncodeState(n)
     pqc_model = encoder.encode_state_PQC()
     discrimination_model = encoder.discrimination_model()
-    model = discrimination_model
+    controlled_model = encoder.discrimination_model(True)
+    model = controlled_model
 
     loss = DiscriminationLoss(0.5, 0.5)
     loss_fn = loss.discrimination_loss
