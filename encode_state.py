@@ -83,11 +83,11 @@ class EncodeState:
     def ent_ops(self):
         return cirq.Circuit(cirq.CNOT(q1, q2) for q1, q2 in zip(self.qubits, self.qubits[1:] + [self.qubits[0]]))
 
-    def discrimination_circuit(self):
+    def discrimination_circuit(self, control_on_measurement: bool = False):
         output = cirq.Circuit()
         for i in range(self.n - self.n_data):
             symbols = sp.symbols('layer{}_0:{}'.format(i, 4 * self.n - i))
-            output.append(self.create_layers(symbols, i))
+            output.append(self.create_layers(symbols, i, control_on_measurement))
         return output
 
     def encode_state_PQC(self):
