@@ -204,6 +204,241 @@ class TestEncodeState(unittest.TestCase):
         print(test.to_text_diagram(transpose=True))
         cirq.testing.assert_same_circuits(test, true)
 
+    def test_create_controlled_layers(self):
+        n = 4
+        encoder = EncodeState(n)
+        circuit = cirq.Circuit()
+        for i in range(n):
+            symbols = sp.symbols('layer{}_0:{}'.format(1, 4 * n - i))
+            layer = encoder.create_layers(symbols, i, True)
+            circuit.append(layer)
+        true = cirq.Circuit([cirq.Moment(operations=[
+                (cirq.X ** sp.Symbol('layer1_0')).on(cirq.GridQubit(0, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.Y ** sp.Symbol('layer1_1')).on(cirq.GridQubit(0, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.Z ** sp.Symbol('layer1_2')).on(cirq.GridQubit(0, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.X ** sp.Symbol('layer1_3')).on(cirq.GridQubit(0, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.Y ** sp.Symbol('layer1_4')).on(cirq.GridQubit(0, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.Z ** sp.Symbol('layer1_5')).on(cirq.GridQubit(0, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.X ** sp.Symbol('layer1_6')).on(cirq.GridQubit(1, 0)),
+                (cirq.CNOT ** sp.Symbol('layer1_12')).on(cirq.GridQubit(0, 0), cirq.GridQubit(0, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.Y ** sp.Symbol('layer1_7')).on(cirq.GridQubit(1, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.Z ** sp.Symbol('layer1_8')).on(cirq.GridQubit(1, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.X ** sp.Symbol('layer1_9')).on(cirq.GridQubit(1, 1)),
+                (cirq.CNOT ** sp.Symbol('layer1_13')).on(cirq.GridQubit(0, 1), cirq.GridQubit(1, 0)),
+            ]), cirq.Moment(operations=[
+                (cirq.Y ** sp.Symbol('layer1_10')).on(cirq.GridQubit(1, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.Z ** sp.Symbol('layer1_11')).on(cirq.GridQubit(1, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.CNOT ** sp.Symbol('layer1_14')).on(cirq.GridQubit(1, 0), cirq.GridQubit(1, 1)),
+            ]), cirq.Moment(operations=[
+                (cirq.CNOT ** sp.Symbol('layer1_15')).on(cirq.GridQubit(1, 1), cirq.GridQubit(0, 0)),
+            ]), cirq.Moment(operations=[
+                cirq.MeasurementGate(1, 'm0', ()).on(cirq.GridQubit(1, 1)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_3_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_4_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_5_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_6_0')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_7_0')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_8_0')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_9_0')).on(
+                                             cirq.GridQubit(0, 0), cirq.GridQubit(0, 1)), control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_10_0')).on(
+                                             cirq.GridQubit(0, 1), cirq.GridQubit(1, 0)), control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_11_0')).on(
+                                             cirq.GridQubit(1, 0), cirq.GridQubit(0, 0)), control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_3_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_4_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_5_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_6_1')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_7_1')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_8_1')).on(cirq.GridQubit(1, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_9_1')).on(
+                                             cirq.GridQubit(0, 0), cirq.GridQubit(0, 1)), control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_10_1')).on(
+                                             cirq.GridQubit(0, 1), cirq.GridQubit(1, 0)), control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 1),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_11_1')).on(
+                                             cirq.GridQubit(1, 0), cirq.GridQubit(0, 0)), control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.MeasurementGate(1, 'm1', ()).on(cirq.GridQubit(1, 0)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_3_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_4_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_5_0')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_6_0')).on(
+                                             cirq.GridQubit(0, 0), cirq.GridQubit(0, 1)), control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_7_0')).on(
+                                             cirq.GridQubit(0, 1), cirq.GridQubit(0, 0)), control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_3_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_4_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_5_1')).on(cirq.GridQubit(0, 1)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_6_1')).on(
+                                             cirq.GridQubit(0, 0), cirq.GridQubit(0, 1)), control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(1, 0),),
+                                         sub_operation=(cirq.CNOT ** sp.Symbol('layer1_7_1')).on(
+                                             cirq.GridQubit(0, 1), cirq.GridQubit(0, 0)), control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.MeasurementGate(1, 'm2', ()).on(cirq.GridQubit(0, 1)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_0')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((0,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.X ** sp.Symbol('layer1_0_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.Y ** sp.Symbol('layer1_1_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.ControlledOperation(controls=(cirq.GridQubit(0, 1),),
+                                         sub_operation=(cirq.Z ** sp.Symbol('layer1_2_1')).on(cirq.GridQubit(0, 0)),
+                                         control_values=((1,),)),
+            ]), cirq.Moment(operations=[
+                cirq.MeasurementGate(1, 'm3', ()).on(cirq.GridQubit(0, 0)),
+            ])
+            ])
+        print(circuit.to_text_diagram(transpose=True))
+        cirq.testing.assert_same_circuits(circuit, true)
+
 
 if __name__ == '__main__':
     unittest.main()

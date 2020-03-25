@@ -3,6 +3,7 @@ import numpy as np
 import sympy as sp
 import tensorflow_quantum as tfq
 import tensorflow as tf
+from typing import Iterable, List, Union
 
 
 class EncodeState:
@@ -25,23 +26,59 @@ class EncodeState:
         circuit.append(cirq.measure(self.qubits[2], self.qubits[3], key='m'))
         return circuit
 
-    def create_layers(self, symbols: sp.Symbol, level: int) -> cirq.Circuit:
+    def create_layers(self, symbols: Iterable[sp.Symbol], level: int, control_circ: bool = False) -> cirq.Circuit:
         layer_qubits = self.qubits[:-level] if level else self.qubits
-        n = len(layer_qubits)
+        control_circ = control_circ if level else False
         circuit = cirq.Circuit()
+        symbols_0 = sp.symbols(tuple([x.name + '_0' for x in symbols]))
+        symbols_1 = sp.symbols(tuple([x.name + '_1' for x in symbols]))
+        if control_circ:
+            for control, control_sym in enumerate((symbols_0, symbols_1)):
+                circuit.append(self.create_control_layer(control, level, layer_qubits, control_sym))
+        else:
+            circuit.append(self.create_non_control_layer(level, layer_qubits, symbols))
+        circuit.append(cirq.measure(layer_qubits[-1], key='m{}'.format(level)))
+        return circuit
+
+    def create_control_layer(self, control: int, level: int,
+                             layer_qubits: List[cirq.Qid], symbols: sp.Symbol) -> cirq.Circuit:
+        circuit = cirq.Circuit()
+        control_qubit = self.qubits[-level]
+        n = len(layer_qubits)
+        for i, qubit in enumerate(layer_qubits):
+            circuit.append(self.one_qubit_unitary(qubit, symbols[3 * i: 3 * i + 3], control_qubit, control))
+        if not level == len(self.qubits) - 1:
+            for i, (qubit_0, qubit_1) in enumerate(zip(layer_qubits, layer_qubits[1:] + [layer_qubits[0]])):
+                circuit.append(
+                    cirq.CNotPowGate(exponent=symbols[3 * n + i]).on(qubit_0, qubit_1).controlled_by(
+                        control_qubit, control_values=[control]))
+        return circuit
+
+    def create_non_control_layer(self, level: int, layer_qubits: List[cirq.Qid],
+                                 symbols: Union[Iterable[sp.Symbol], sp.Symbol]) -> cirq.Circuit:
+        circuit = cirq.Circuit()
+        n = len(layer_qubits)
         for i, qubit in enumerate(layer_qubits):
             circuit.append(self.one_qubit_unitary(qubit, symbols[3 * i: 3 * i + 3]))
         if not level == len(self.qubits) - 1:
             for i, (qubit_0, qubit_1) in enumerate(zip(layer_qubits, layer_qubits[1:] + [layer_qubits[0]])):
-                circuit.append(cirq.CNotPowGate(exponent=symbols[3 * n + i]).on(qubit_0, qubit_1))
-        circuit.append(cirq.measure(layer_qubits[-1], key='m{}'.format(level)))
+                circuit.append(
+                    cirq.CNotPowGate(exponent=symbols[3 * n + i]).on(qubit_0, qubit_1))
         return circuit
 
     @staticmethod
-    def one_qubit_unitary(qubit: cirq.Qid, symbols: sp.Symbol) -> cirq.Circuit:
-        return cirq.Circuit([cirq.X(qubit)**symbols[0],
-                             cirq.Y(qubit)**symbols[1],
-                             cirq.Z(qubit)**symbols[2]])
+    def one_qubit_unitary(qubit: cirq.Qid, symbols: sp.Symbol, control_qubit: cirq.Qid = None, control: int = None) -> cirq.Circuit:
+        if control_qubit is None:
+            return cirq.Circuit([cirq.X(qubit)**symbols[0],
+                                 cirq.Y(qubit)**symbols[1],
+                                 cirq.Z(qubit)**symbols[2]])
+        else:
+            return cirq.Circuit([cirq.XPowGate(exponent=symbols[0]).on(qubit).controlled_by(
+                                     control_qubit, control_values=[control]),
+                                 cirq.YPowGate(exponent=symbols[1]).on(qubit).controlled_by(
+                                     control_qubit, control_values=[control]),
+                                 cirq.ZPowGate(exponent=symbols[2]).on(qubit).controlled_by(
+                                     control_qubit, control_values=[control])])
 
     def ent_ops(self):
         return cirq.Circuit(cirq.CNOT(q1, q2) for q1, q2 in zip(self.qubits, self.qubits[1:] + [self.qubits[0]]))
