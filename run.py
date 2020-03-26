@@ -10,12 +10,12 @@ from loss import DiscriminationLoss
 def main():
     n = 4
     circuits = InputCircuits(n)
-    train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits()
+    train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits(mu_a=0.9)
     encoder = EncodeState(n)
     pqc_model = encoder.encode_state_PQC()
     discrimination_model = encoder.discrimination_model()
-    controlled_model = encoder.discrimination_model(True)
-    model = controlled_model
+    # controlled_model = encoder.discrimination_model(True)
+    model = discrimination_model
 
     loss = DiscriminationLoss(0.5, 0.5)
     loss_fn = loss.discrimination_loss

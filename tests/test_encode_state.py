@@ -142,7 +142,8 @@ class TestEncodeState(unittest.TestCase):
         n = 4
         encoder = EncodeState(n)
         test = encoder.discrimination_circuit()
-        true = cirq.Circuit([cirq.Moment(operations=[
+        true = cirq.Circuit([
+            cirq.Moment(operations=[
                 (cirq.X ** sp.Symbol('layer0_0')).on(cirq.GridQubit(0, 0)),
             ]), cirq.Moment(operations=[
                 (cirq.Y ** sp.Symbol('layer0_1')).on(cirq.GridQubit(0, 0)),
@@ -443,7 +444,6 @@ class TestEncodeState(unittest.TestCase):
     def test_controlled_discrimination_circuit(self):
         n = 4
         encoder = EncodeState(n)
-        circuit = cirq.Circuit()
         test = encoder.discrimination_circuit(True)
         true = cirq.Circuit([
             cirq.Moment(operations=[
