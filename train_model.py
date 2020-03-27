@@ -1,5 +1,5 @@
 import tensorflow as tf
-import tensorflow_quantum as tfq
+import cirq
 import matplotlib.pyplot as plt
 import datetime
 import copy
@@ -11,13 +11,14 @@ from typing import List, Tuple, Dict
 from encode_state import EncodeState
 from input_circuits import InputCircuits
 from loss import DiscriminationLoss
+from noise.noise_model import TwoQubitNoiseModel, two_qubit_depolarize
 
 
 class TrainModel:
 
     def __init__(self, epochs: int = 7, batch_size: int = 20,
                  n_qubits: int = 4, mu_a: float = 0.5, err_loss: float = 0.5, learning_rate: float = 0.01,
-                 restore_loc: str = None):
+                 restore_loc: str = None, noise_level: float = None):
         self.epochs = epochs
         self.batch_size = batch_size
         self.n = n_qubits
@@ -25,6 +26,7 @@ class TrainModel:
         self.err_loss = err_loss
         self.inc_loss = 1 - err_loss
         self.lr = learning_rate
+        self.noise_level = noise_level
         params = copy.copy(locals())
         params.pop('self')
         self.save_loc = self.set_save_loc() if restore_loc is None else restore_loc
@@ -59,7 +61,14 @@ class TrainModel:
         train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits(
             mu_a=self.mu_a)
         encoder = EncodeState(self.n)
-        model = encoder.discrimination_model()
+
+        if self.noise_level is not None:
+            noise_model = TwoQubitNoiseModel(cirq.depolarize(4 * self.noise_level / 5),
+                                             two_qubit_depolarize(self.noise_level))
+            backend = cirq.DensityMatrixSimulator(noise=noise_model)
+        else:
+            backend = None
+        model = encoder.discrimination_model(backend=backend)
         loss = DiscriminationLoss(self.err_loss, self.inc_loss)
         loss_fn = loss.discrimination_loss
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=self.lr),
@@ -76,9 +85,9 @@ class TrainModel:
         ax.set_xlabel('step')
         ax.set_ylabel('loss')
         fig.savefig(os.path.join(self.save_loc, 'training_plot.png'))
-        #model.save(os.path.join(self.save_loc, 'final_model.h5'))
+        # model.save(os.path.join(self.save_loc, 'final_model.h5'))
 
 
 if __name__ == '__main__':
-    trainer = TrainModel()
+    trainer = TrainModel(noise_level=0.01)
     trainer.train_model()
