@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from encode_state import EncodeState
 from input_circuits import InputCircuits
 from loss import DiscriminationLoss
-
+from noise.noise_model import TwoQubitNoiseModel, two_qubit_depolarize
 
 def main():
     n = 4
     circuits = InputCircuits(n)
     train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits(mu_a=0.9)
     encoder = EncodeState(n)
-    noise_model = cirq.devices.ConstantQubitNoiseModel(cirq.depolarize(0.1))
+    noise_model = TwoQubitNoiseModel(cirq.depolarize(0.01), two_qubit_depolarize(0.01))
     noisy_sim = cirq.DensityMatrixSimulator(noise=noise_model)
     pqc_model = encoder.encode_state_PQC()
     # discrimination_model = encoder.discrimination_model()
