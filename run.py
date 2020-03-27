@@ -1,4 +1,5 @@
 import tensorflow as tf
+import cirq
 import tensorflow_quantum as tfq
 import matplotlib.pyplot as plt
 
@@ -12,10 +13,12 @@ def main():
     circuits = InputCircuits(n)
     train_circuits, train_labels, test_circuits, test_labels = circuits.create_discrimination_circuits(mu_a=0.9)
     encoder = EncodeState(n)
+    noisy_sim = cirq.Simulator()
     pqc_model = encoder.encode_state_PQC()
-    discrimination_model = encoder.discrimination_model()
+    # discrimination_model = encoder.discrimination_model()
     # controlled_model = encoder.discrimination_model(True)
-    model = discrimination_model
+    noisy_discrimination = encoder.discrimination_model(backend=noisy_sim)
+    model = noisy_discrimination
 
     loss = DiscriminationLoss(0.5, 0.5)
     loss_fn = loss.discrimination_loss

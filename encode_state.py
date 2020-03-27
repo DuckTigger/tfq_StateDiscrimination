@@ -99,10 +99,10 @@ class EncodeState:
         encoding_model = tfq.layers.PQC(encoding_circuit, readout_ops)(encoding_layer)
         return tf.keras.Model(inputs=[encoding_input], outputs=[encoding_model])
 
-    def discrimination_model(self, control: bool = False):
+    def discrimination_model(self, control: bool = False, backend: 'cirq.Simulator' = None):
         discrimination_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
         discrimination_circuit = self.discrimination_circuit(control)
         measurement_qubits = self.qubits[::-1][:-self.n_data] if self.n_data else self.qubits
         readout_ops = [cirq.Z(qubit) for qubit in measurement_qubits]
-        discrimination_pqc = tfq.layers.PQC(discrimination_circuit, readout_ops)(discrimination_input)
+        discrimination_pqc = tfq.layers.PQC(discrimination_circuit, readout_ops, backend=backend)(discrimination_input)
         return tf.keras.Model(inputs=[discrimination_input], outputs=[discrimination_pqc])
