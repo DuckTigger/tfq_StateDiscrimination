@@ -8,6 +8,7 @@ from input_circuits import InputCircuits
 from loss import DiscriminationLoss
 from noise.noise_model import TwoQubitNoiseModel, two_qubit_depolarize
 
+
 def main():
     n = 4
     circuits = InputCircuits(n)
