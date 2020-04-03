@@ -1,32 +1,34 @@
-import cirq
-import cmath
-from cirq import value, protocols
-# noinspection PyProtectedMember
-from cirq._compat import proper_repr
-from cirq.ops import gate_features, eigen_gate, raw_types
+from cirq.value import value_equality
+from cirq import protocols
+from cirq.ops import gate_features
 from typing import Sequence, Tuple
-
 import numpy as np
 import itertools as it
 
-def create_noise_matrices():
-    tr_x = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
-    tr_z = np.array([[1, 0, 0], [0, np.exp(2j * np.pi / 3), 0], [0, 0, np.exp(4j * np.pi / 3)]])
-    eye = np.eye(3)
-    z_sq  = tr_z @ tr_z
-    x_sq = tr_x @ tr_x
 
-    x_set = [eye, tr_x, x_sq]
-    z_set = [eye, tr_z, z_sq]
+from qutrits.qutrit_ops import QutritMinusGate, QutritPlusGate, QutritZPlusGate, QutritZMinusGate
+
+
+def create_noise_matrices():
+    trit_plus = protocols.unitary(QutritPlusGate())
+    trit_minus = protocols.unitary(QutritZMinusGate())
+    trit_zplus = protocols.unitary(QutritZPlusGate())
+    trit_zminus = protocols.unitary(QutritZMinusGate())
+    eye = np.eye(3)
+
+    x_set = [eye, trit_plus, trit_minus]
+    z_set = [eye, trit_zplus, trit_zminus]
     prods = [a @ b for a, b in it.product(x_set, z_set)]
     return prods
+
 
 def two_q_noise_matrices():
     one_q = create_noise_matrices()
     mats = [np.kron(a, b) for a, b in it.product(one_q, one_q)]
     return mats
 
-@cirq.value.value_equality
+
+@value_equality
 class SingleQutritDepolarizingChannel(gate_features.SingleQubitGate):
 
     def __init__(self, p):
@@ -58,7 +60,8 @@ class SingleQutritDepolarizingChannel(gate_features.SingleQubitGate):
 def qutrit_depolarise(p: float) -> SingleQutritDepolarizingChannel:
     return SingleQutritDepolarizingChannel(p)
 
-@cirq.value.value_equality
+
+@value_equality
 class TwoQutritDepolarizingChannel(gate_features.TwoQubitGate):
 
     def __init__(self, p: float):
@@ -89,7 +92,3 @@ class TwoQutritDepolarizingChannel(gate_features.TwoQubitGate):
 
 def two_qutrit_depolarize(p: float) -> TwoQutritDepolarizingChannel:
     return TwoQutritDepolarizingChannel(p)
-
-
-if __name__ == '__main__':
-    print(two_q_noise_matrices())

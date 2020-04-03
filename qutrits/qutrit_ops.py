@@ -1,6 +1,7 @@
 import cirq
 import numpy as np
 
+
 class QutritPlusGate(cirq.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
@@ -25,6 +26,32 @@ class QutritMinusGate(cirq.SingleQubitGate):
 
     def _circuit_diagram_info_(self, args):
         return '[-1]'
+
+
+class QutritZPlusGate(cirq.SingleQubitGate):
+    def _qid_shape(self):
+        return (3,)
+
+    def _unitary_(self):
+        return np.array([[1, 0, 0],
+                        [0, np.exp(2j * np.pi / 3), 0],
+                        [0, 0, np.exp(4j * np.pi / 3)]])
+
+    def _circuit_diagram_info(self, args):
+        return '[+Z]'
+
+
+class QutritZMinusGate(cirq.SingleQubitGate):
+    def _qid_shape(self):
+        return (3,)
+
+    def _unitary_(self):
+        return np.array([[1, 0, 0],
+                         [0, np.exp(4j * np.pi / 3), 0],
+                         [0, 0, np.exp(2j * np.pi / 3)]])
+
+    def _circuit_diagram_info(self, args):
+        return '[-Z]'
 
 
 class C2QutritPlusGate(cirq.TwoQubitGate):
