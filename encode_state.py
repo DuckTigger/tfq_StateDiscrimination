@@ -5,6 +5,8 @@ import tensorflow_quantum as tfq
 import tensorflow as tf
 from typing import Iterable, List, Union
 
+from qutrits.qutrit_ops import *
+
 
 class EncodeState:
 
@@ -83,6 +85,16 @@ class EncodeState:
     def ent_ops(self):
         return cirq.Circuit(cirq.CNOT(q1, q2) for q1, q2 in zip(self.qubits, self.qubits[1:] + [self.qubits[0]]))
 
+    @staticmethod
+    def one_qutrit_unitary(qutrit: 'cirq.Qid', symbols: 'sp.Symbol',
+                           control_qutrit: 'cirq.Qid' = None, control: int = None) -> 'cirq.Circuit':
+        if control_qutrit is None:
+            return cirq.Circuit([
+                QutritPlusGate().on
+            ])
+        else:
+            raise NotImplementedError
+
     def discrimination_circuit(self, control_on_measurement: bool = False):
         output = cirq.Circuit()
         for i in range(self.n - self.n_data):
@@ -106,3 +118,11 @@ class EncodeState:
         readout_ops = [cirq.Z(qubit) for qubit in measurement_qubits]
         discrimination_pqc = tfq.layers.PQC(discrimination_circuit, readout_ops, backend=backend)(discrimination_input)
         return tf.keras.Model(inputs=[discrimination_input], outputs=[discrimination_pqc])
+
+    def qutrit_model(self, backend: 'Union[cirq.DensityMatrixSimulator, cirq.Simulator]'):
+        input_layer = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
+        qutrit_circuit = self.qutrit_circuit()
+        measurement_qubits = self.qubits[::-1][:-self.n_data] if self.n_data else self.qubits
+        readout_ops = [cirq.Z(qubit) for qubit in measurement_qubits]
+        discrimination_pqc = tfq.layers.PQC(qutrit_circuit, readout_ops, backend=backend)(input_layer)
+        return tf.keras.Model(inputs=[input_layer], outputs=[discrimination_pqc])
