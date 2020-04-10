@@ -1,5 +1,5 @@
-from cirq.value import value_equality
-from cirq import protocols
+import cirq
+from cirq import protocols, value
 from cirq.ops import gate_features
 from typing import Sequence, Tuple
 import numpy as np
@@ -28,7 +28,7 @@ def two_q_noise_matrices():
     return mats
 
 
-@value_equality
+@value.value_equality
 class SingleQutritDepolarizingChannel(gate_features.SingleQubitGate):
 
     def __init__(self, p):
@@ -44,7 +44,7 @@ class SingleQutritDepolarizingChannel(gate_features.SingleQubitGate):
     def _has_mixture_(self) -> bool:
         return True
 
-    def _value_equality_values(self):
+    def _value_equality_values_(self):
         return self._p
 
     def __repr__(self) -> str:
@@ -61,7 +61,7 @@ def qutrit_depolarise(p: float) -> SingleQutritDepolarizingChannel:
     return SingleQutritDepolarizingChannel(p)
 
 
-@value_equality
+@value.value_equality
 class TwoQutritDepolarizingChannel(gate_features.TwoQubitGate):
 
     def __init__(self, p: float):
@@ -77,7 +77,7 @@ class TwoQutritDepolarizingChannel(gate_features.TwoQubitGate):
     def _has_mixture_(self) -> bool:
         return True
 
-    def _value_equality_values(self):
+    def _value_equality_values_(self):
         return self._p
 
     def __repr__(self) -> str:

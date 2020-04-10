@@ -8,10 +8,10 @@ class QutritPlusGate(eigen_gate.EigenGate, gate_features.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
 
-    def _unitary_(self):
-        return np.array([[0, 0, 1],
-                         [1, 0, 0],
-                         [0, 1, 0]])
+    # def _unitary_(self):
+    #     return np.array([[0, 0, 1],
+    #                      [1, 0, 0],
+    #                      [0, 1, 0]])
 
     def _eigen_components(self):
         rt_3 = np.sqrt(3)
@@ -36,10 +36,10 @@ class QutritMinusGate(eigen_gate.EigenGate, gate_features.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
 
-    def _unitary_(self):
-        return np.array([[0, 1, 0],
-                         [0, 0, 1],
-                         [1, 0, 0]])
+    # def _unitary_(self):
+    #     return np.array([[0, 1, 0],
+    #                      [0, 0, 1],
+    #                      [1, 0, 0]])
 
     def _eigen_components(self):
         rt_3 = np.sqrt(3)
@@ -64,10 +64,10 @@ class QutritZPlusGate(eigen_gate.EigenGate, gate_features.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
 
-    def _unitary_(self):
-        return np.array([[1, 0, 0],
-                        [0, np.exp(2j * np.pi / 3), 0],
-                        [0, 0, np.exp(4j * np.pi / 3)]])
+    # def _unitary_(self):
+    #     return np.array([[1, 0, 0],
+    #                     [0, np.exp(2j * np.pi / 3), 0],
+    #                     [0, 0, np.exp(4j * np.pi / 3)]])
 
     def _eigen_components(self):
         return [(0,
@@ -91,10 +91,10 @@ class QutritZMinusGate(eigen_gate.EigenGate, gate_features.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
 
-    def _unitary_(self):
-        return np.array([[1, 0, 0],
-                         [0, np.exp(4j * np.pi / 3), 0],
-                         [0, 0, np.exp(2j * np.pi / 3)]])
+    # def _unitary_(self):
+    #     return np.array([[1, 0, 0],
+    #                      [0, np.exp(4j * np.pi / 3), 0],
+    #                      [0, 0, np.exp(2j * np.pi / 3)]])
 
     def _eigen_components(self):
         return [(0,
@@ -124,16 +124,16 @@ class C2QutritPlusGate(eigen_gate.EigenGate, gate_features.TwoQubitGate):
     def _qid_shape_(self):
         return (3,3,)
 
-    def _unitary_(self):
-        return np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 1, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 1],
-                         [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 1, 0]])
+    # def _unitary_(self):
+    #     return np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0],
+    #                      [0, 1, 0, 0, 0, 0, 0, 0, 0],
+    #                      [0, 0, 1, 0, 0, 0, 0, 0, 0],
+    #                      [0, 0, 0, 1, 0, 0, 0, 0, 0],
+    #                      [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    #                      [0, 0, 0, 0, 0, 1, 0, 0, 0],
+    #                      [0, 0, 0, 0, 0, 0, 0, 0, 1],
+    #                      [0, 0, 0, 0, 0, 0, 1, 0, 0],
+    #                      [0, 0, 0, 0, 0, 0, 0, 1, 0]])
 
     def _eigen_components(self):
         rt_3 = np.sqrt(3)
@@ -182,14 +182,14 @@ class C2QutritQubitXGate(eigen_gate.EigenGate, gate_features.TwoQubitGate):
     def _qid_shape_(self):
         return (3,2,)
 
-    def _unitary_(self):
-        return np.array([[1, 0, 0, 0, 0, 0],
-                         [0, 1, 0, 0, 0, 0],
-                         [0, 0, 1, 0, 0, 0],
-                         [0, 0, 0, 1, 0, 0],
-                         [0, 0, 0, 0, 0, 1],
-                         [0, 0, 0, 0, 1, 0]])
-    
+    # def _unitary_(self):
+    #     return np.array([[1, 0, 0, 0, 0, 0],
+    #                      [0, 1, 0, 0, 0, 0],
+    #                      [0, 0, 1, 0, 0, 0],
+    #                      [0, 0, 0, 1, 0, 0],
+    #                      [0, 0, 0, 0, 0, 1],
+    #                      [0, 0, 0, 0, 1, 0]])
+
     def _eigen_components(self):
         return [(1,
                  np.array([
