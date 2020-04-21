@@ -8,7 +8,7 @@ from qutrits.qutrit_noise import TwoQutritDepolarizingChannel, SingleQutritDepol
     two_qutrit_depolarize, qutrit_depolarise
 
 
-class MyTestCase(unittest.TestCase):
+class TestQutritOps(unittest.TestCase):
     def test_qutrit_circuit(self):
         qutrits = [cirq.LineQid(0, dimension=3), cirq.LineQid(1, dimension=3)]
         circuit = cirq.Circuit(
