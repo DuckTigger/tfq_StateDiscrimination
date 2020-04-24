@@ -21,7 +21,8 @@ class ModelCircuits:
         return circuit
 
     @staticmethod
-    def create_layers(qubits: List[cirq.Qid], symbols: Iterable[sp.Symbol], level: int, control_circ: bool = False) -> cirq.Circuit:
+    def create_layers(qubits: List[cirq.Qid], symbols: Iterable[sp.Symbol], level: int,
+                      control_circ: bool = False) -> cirq.Circuit:
         layer_qubits = qubits[:-level] if level else qubits
         control_circ = control_circ if level else False
         circuit = cirq.Circuit()
@@ -40,20 +41,19 @@ class ModelCircuits:
     def create_leakage_layers(work_qubits: 'List[cirq.Qid]', ancilla_qubits: 'List[cirq.Qid]',
                               readout_qubits: 'List[cirq.Qid]', symbols: 'Iterable[sp.Symbol]', level: int,
                               constant_leakage: float = None):
+        final = level == (len(work_qubits) - 1)
         (work_qubits, ancilla_qubits, readout_qubits) = \
-            (work_qubits[:-level], ancilla_qubits[:-level], readout_qubits[:-level]) \
-                if level else (work_qubits, ancilla_qubits, readout_qubits)
+            (work_qubits[:-level], ancilla_qubits[:-level], readout_qubits[:-level]) if level \
+                else (work_qubits, ancilla_qubits, readout_qubits)
 
-        circuit = cirq.Circuit()
-
-        symbols_leakage = sp.symbols(tuple([x.name + '_leak' for x in symbols])) if constant_leakage is None\
+        symbols_leakage = sp.symbols(tuple([x.name + '_leak' for x in symbols])) if constant_leakage is None \
             else [constant_leakage for _ in range(len(work_qubits))]
 
-        final = level == len(work_qubits) - 1
-        circuit.append(ModelCircuits.create_non_control_layer(final, work_qubits, symbols))
-        circuit.append(ModelCircuits.leakage_circuit(work_qubits, ancilla_qubits, symbols_leakage))
-        circuit.append(ModelCircuits.OR_circuit(work_qubits, ancilla_qubits, readout_qubits))
-        return circuit
+        yield ModelCircuits.create_non_control_layer(final, work_qubits, symbols)
+        for work, ancilla, symbol in zip(work_qubits, ancilla_qubits, symbols_leakage):
+            yield ModelCircuits.leakage(work, ancilla, symbol)
+        yield ModelCircuits.quantum_OR(work_qubits[-1], ancilla_qubits[-1], readout_qubits[-1])
+        yield cirq.measure(readout_qubits[-1], key='m{}'.format(level))
 
     @staticmethod
     def create_non_control_layer(final: bool, layer_qubits: List[cirq.Qid],
@@ -84,33 +84,36 @@ class ModelCircuits:
         return circuit
 
     @staticmethod
-    def one_qubit_unitary(qubit: cirq.Qid, symbols: sp.Symbol, control_qubit: cirq.Qid = None, control: int = None) -> cirq.Circuit:
+    def one_qubit_unitary(qubit: cirq.Qid, symbols: sp.Symbol, control_qubit: cirq.Qid = None,
+                          control: int = None) -> cirq.Circuit:
         if control_qubit is None:
-            return cirq.Circuit([cirq.X(qubit)**symbols[0],
-                                 cirq.Y(qubit)**symbols[1],
-                                 cirq.Z(qubit)**symbols[2]])
+            yield cirq.X(qubit) ** symbols[0]
+            yield cirq.Y(qubit) ** symbols[1]
+            yield cirq.Z(qubit) ** symbols[2]
         else:
-            return cirq.Circuit([cirq.XPowGate(exponent=symbols[0]).on(qubit).controlled_by(
-                                     control_qubit, control_values=[control]),
-                                 cirq.YPowGate(exponent=symbols[1]).on(qubit).controlled_by(
-                                     control_qubit, control_values=[control]),
-                                 cirq.ZPowGate(exponent=symbols[2]).on(qubit).controlled_by(
-                                     control_qubit, control_values=[control])])
+            yield cirq.XPowGate(exponent=symbols[0]).on(qubit).controlled_by(
+                control_qubit, control_values=[control])
+            yield cirq.YPowGate(exponent=symbols[1]).on(qubit).controlled_by(
+                    control_qubit, control_values=[control])
+            yield cirq.ZPowGate(exponent=symbols[2]).on(qubit).controlled_by(
+                    control_qubit, control_values=[control])
 
     @staticmethod
     def ent_ops(qubits: 'List[cirq.Qid]'):
-        return cirq.Circuit(cirq.CNOT(q1, q2) for q1, q2 in zip(qubits, qubits[1:] + [qubits[0]]))
+        yield (cirq.CNOT(q1, q2) for q1, q2 in zip(qubits, qubits[1:] + [qubits[0]]))
 
     @staticmethod
-    def leakage(leaky_qubit : 'cirq.Qid', ancilla_qubit: 'cirq.Qid', symbol: 'sp.Symbol'):
-        circuit = cirq.Circuit()
-        circuit.append(cirq.CNOT(control=ancilla_qubit, target=leaky_qubit))
-        circuit.append((cirq.Y ** symbol)(ancilla_qubit))
-        circuit.append(cirq.CNOT(control=leaky_qubit, target=ancilla_qubit))
-        circuit.append(((cirq.Y ** symbol) ** -1)(ancilla_qubit))
-        circuit.append(cirq.CNOT(control=leaky_qubit, target=ancilla_qubit))
-        circuit.append(cirq.CNOT(control=ancilla_qubit, target=leaky_qubit))
-        return circuit
+    def entangle_data_work(data: 'List[cirq.Qid]', work: 'List[cirq.Qid]'):
+        yield  (cirq.CNOT(q0, q1) for q0, q1 in zip(data, work))
+
+    @staticmethod
+    def leakage(leaky_qubit: 'cirq.Qid', ancilla_qubit: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield cirq.CNOT(control=ancilla_qubit, target=leaky_qubit)
+        yield (cirq.Y ** symbol)(ancilla_qubit)
+        yield cirq.CNOT(control=leaky_qubit, target=ancilla_qubit)
+        yield ((cirq.Y ** symbol) ** -1)(ancilla_qubit)
+        yield cirq.CNOT(control=leaky_qubit, target=ancilla_qubit)
+        yield cirq.CNOT(control=ancilla_qubit, target=leaky_qubit)
 
     @staticmethod
     def leakage_circuit(leaky_qubits: 'List[cirq.Qid]', ancilla_qubits: 'List[cirq.Qid]',
@@ -122,24 +125,21 @@ class ModelCircuits:
 
     @staticmethod
     def quantum_OR(qubit_a: 'cirq.Qid', qubit_b: 'cirq.Qid', output_qubit: 'cirq.Qid'):
-        circuit = cirq.Circuit()
-
         sqrt_x = cirq.X ** 0.5
 
-        circuit.append(sqrt_x(output_qubit))
-        circuit.append(cirq.CNOT(control=qubit_a, target=output_qubit))
+        yield sqrt_x(output_qubit)
+        yield cirq.CNOT(control=qubit_a, target=output_qubit)
 
-        circuit.append(sqrt_x(output_qubit))
-        circuit.append(cirq.CNOT(control=qubit_b, target=output_qubit))
+        yield sqrt_x(output_qubit)
+        yield cirq.CNOT(control=qubit_b, target=output_qubit)
 
-        circuit.append((sqrt_x ** -1)(output_qubit))
-        circuit.append(cirq.CNOT(control=qubit_a, target=output_qubit))
+        yield (sqrt_x ** -1)(output_qubit)
+        yield cirq.CNOT(control=qubit_a, target=output_qubit)
 
-        circuit.append((sqrt_x ** -1)(output_qubit))
-        circuit.append(cirq.CNOT(control=qubit_b, target=output_qubit))
+        yield (sqrt_x ** -1)(output_qubit)
+        yield cirq.CNOT(control=qubit_b, target=output_qubit)
 
-        circuit.append(cirq.CNOT(control=qubit_a, target=output_qubit))
-        return circuit
+        yield cirq.CNOT(control=qubit_a, target=output_qubit)
 
     @staticmethod
     def OR_circuit(a_qubits: 'List[cirq.Qid]', b_qubits: 'List[cirq.Qid]', output_qubits: 'List[cirq.Qid]'):
