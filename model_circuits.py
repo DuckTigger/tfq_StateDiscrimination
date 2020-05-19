@@ -1,5 +1,6 @@
 import cirq
 import sympy as sp
+import itertools as it
 from typing import List, Iterable, Union
 
 
@@ -99,6 +100,39 @@ class ModelCircuits:
                     control_qubit, control_values=[control])
 
     @staticmethod
+    def create_qutrit_layers(work_qubits: 'List[cirq.Qid]', ancilla_qubits: 'List[cirq.Qid]',
+                            readout_qubits: 'List[cirq.Qid]',
+                            level: int, layer_qubits: 'List[cirq.Qid]', symbols:sp.Symbol) -> 'cirq.Circuit':
+        circuit = cirq.Circuit()
+        n = len(layer_qubits)
+                                                                                                    
+        for i, (qubit, ancilla) in enumerate(zip(work_qubits, ancilla_qubits)):
+            pass
+
+    @staticmethod
+    def create_qutrit_layer(layer_qubits: 'List[cirq.Qid]', layer_ancilla: 'List[cirq.Qid]',
+                            final: bool, symbols: sp.Symbol) -> 'cirq.Circuit':
+        n = len(layer_qubits)
+        for i, (qubit, ancilla) in enumerate(zip(layer_qubits, layer_ancilla)):
+            yield ModelCircuits.qutrit_unitary(qubit, ancilla, symbols[8 * i: 8 * i + 8])
+        if not final:
+            for i, (control_qubit, control_ancilla,
+                    target_qubit, target_ancilla) in enumerate(zip(layer_qubits, layer_ancilla,
+                                                                   layer_qubits[1:] + layer_qubits[0],
+                                                                   layer_ancilla[1:] + layer_ancilla[0])):
+                pass
+
+
+    @staticmethod
+    def qutrit_unitary(qubit: 'cirq.Qid', ancilla: 'cirq.Qid', symbols: 'sp.Symbol'):
+        x = (ModelCircuits.qutrit_I, ModelCircuits.qutrit_X, ModelCircuits.qutrit_X2)
+        z = (ModelCircuits.qutrit_I, ModelCircuits.qutrit_Z, ModelCircuits.qutrit_Z2)
+        prod = filter(lambda x: x.count(ModelCircuits.qutrit_I) != 2, it.product(x, z))
+        for (gate1, gate2), symbol in zip(prod, symbols):
+            yield gate1(ancilla, qubit, symbol)
+            yield gate2(ancilla, qubit, symbol)
+
+    @staticmethod
     def ent_ops(qubits: 'List[cirq.Qid]'):
         yield (cirq.CNOT(q1, q2) for q1, q2 in zip(qubits, qubits[1:] + [qubits[0]]))
 
@@ -147,3 +181,89 @@ class ModelCircuits:
         for a, b, out in zip(a_qubits, b_qubits, output_qubits):
             circuit += ModelCircuits.quantum_OR(a, b, out)
         return circuit
+
+    @staticmethod
+    def qutrit_CSUM(control_ancilla : 'cirq.Qid', control_qubit: 'cirq.Qid',
+                    target_ancilla: 'cirq.Qid', target_qubit: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield ModelCircuits.qutrit_CX(control_qubit, target_ancilla, target_qubit, symbol)
+        yield ModelCircuits.qutrit_CX2(control_qubit, target_ancilla, target_qubit, symbol)
+        yield ModelCircuits.qutrit_CX(control_ancilla, target_ancilla, target_qubit, symbol)
+        yield ModelCircuits.qutrit_CX2(control_ancilla, target_ancilla, target_qubit, symbol)
+
+    @staticmethod
+    def qutrit_CX(control: 'cirq.Qid', target_qubit: 'cirq.Qid', target_ancilla: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
+        yield ModelCircuits.toffoli(control, target_qubit, target_ancilla, symbol)
+        yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
+
+    @staticmethod
+    def qutrit_CX2(control: 'cirq.Qid', target_qubit: 'cirq.Qid', target_ancilla: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield cirq.X(target_ancilla)
+        yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
+        yield cirq.X(target_ancilla)
+        yield cirq.X(target_qubit)
+        yield ModelCircuits.toffoli(control, target_qubit, target_ancilla, symbol)
+        yield cirq.X(target_qubit)
+
+    @staticmethod
+    def toffoli(control_0: 'cirq.Qid', control_1: 'cirq.Qid', target: 'cirq.Qid'):
+        yield cirq.CNOT(control_0, control_1)
+        yield cirq.T(control_0)
+        yield cirq.T(control_1) ** -1
+        yield cirq.CNOT(control_0, control_1)
+        yield cirq.H(target)
+        yield cirq.T(control_1)
+        yield cirq.T(target)
+        yield cirq.CNOT(control_0, target)
+        yield cirq.T(target) ** -1
+        yield cirq.CNOT(control_1, target)
+        yield cirq.T(target)
+        yield cirq.CNOT(control_0, target)
+        yield cirq.T(target) ** -1
+        yield cirq.CNOT(control_1, target)
+        yield cirq.H(target)
+
+    @staticmethod
+    def qutrit_I(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.identity_each(ancilla, qubit)
+
+    @staticmethod
+    def qutrit_X2(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.X(qubit)
+        yield cirq.CNOT(qubit, ancilla)**exponent
+        yield cirq.X(qubit)
+        yield cirq.X(ancilla)
+        yield cirq.CNOT(ancilla, qubit)**exponent
+        yield cirq.X(ancilla)
+
+    @staticmethod
+    def qutrit_X(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.X(ancilla)
+        yield cirq.CNOT(ancilla, qubit) ** exponent
+        yield cirq.X(ancilla)
+        yield cirq.X(qubit)
+        yield cirq.CNOT(qubit, ancilla) ** exponent
+        yield cirq.X(qubit)
+
+    @staticmethod
+    def qutrit_Z(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.X(qubit)
+        yield cirq.CZ(qubit, ancilla) ** (4*exponent/3)
+        yield cirq.X(qubit)
+        yield cirq.X(ancilla)
+        yield cirq.CZ(ancilla, qubit) ** (2*exponent / 3)
+        yield cirq.X(ancilla)
+
+    @staticmethod
+    def qutrit_Z2(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.X(qubit)
+        yield cirq.CZ(qubit, ancilla) ** (2*exponent/3)
+        yield cirq.X(qubit)
+        yield cirq.X(ancilla)
+        yield cirq.CZ(ancilla, qubit) ** (4*exponent / 3)
+        yield cirq.X(ancilla)
+
+    @staticmethod
+    def qutrit_CNOT(ancilla: 'cirq.Qid', qubit: 'cirq.Qid', target: 'cirq.Qid', exponent: float = 1.):
+        yield cirq.CNOT(qubit, target) ** exponent
+        yield cirq.CNOT(ancilla, target) ** exponent
