@@ -185,41 +185,47 @@ class ModelCircuits:
     @staticmethod
     def qutrit_CSUM(control_ancilla : 'cirq.Qid', control_qubit: 'cirq.Qid',
                     target_ancilla: 'cirq.Qid', target_qubit: 'cirq.Qid', symbol: 'sp.Symbol'):
-        yield ModelCircuits.qutrit_CX(control_qubit, target_ancilla, target_qubit, symbol)
-        yield ModelCircuits.qutrit_CX2(control_qubit, target_ancilla, target_qubit, symbol)
         yield ModelCircuits.qutrit_CX(control_ancilla, target_ancilla, target_qubit, symbol)
-        yield ModelCircuits.qutrit_CX2(control_ancilla, target_ancilla, target_qubit, symbol)
+        yield ModelCircuits.qutrit_CX2(control_qubit, target_ancilla, target_qubit, symbol)
 
     @staticmethod
     def qutrit_CX(control: 'cirq.Qid', target_qubit: 'cirq.Qid', target_ancilla: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield cirq.X(target_ancilla)
         yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
+        yield cirq.X(target_ancilla)
+        yield cirq.X(target_qubit)
         yield ModelCircuits.toffoli(control, target_qubit, target_ancilla, symbol)
-        yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
+        yield cirq.X(target_qubit)
 
     @staticmethod
     def qutrit_CX2(control: 'cirq.Qid', target_qubit: 'cirq.Qid', target_ancilla: 'cirq.Qid', symbol: 'sp.Symbol'):
+        yield cirq.X(target_qubit)
+        yield ModelCircuits.toffoli(control,  target_qubit, target_ancilla, symbol)
+        yield cirq.X(target_qubit)
         yield cirq.X(target_ancilla)
         yield ModelCircuits.toffoli(control, target_ancilla, target_qubit, symbol)
         yield cirq.X(target_ancilla)
-        yield cirq.X(target_qubit)
-        yield ModelCircuits.toffoli(control, target_qubit, target_ancilla, symbol)
-        yield cirq.X(target_qubit)
 
     @staticmethod
-    def toffoli(control_0: 'cirq.Qid', control_1: 'cirq.Qid', target: 'cirq.Qid'):
-        yield cirq.CNOT(control_0, control_1)
-        yield cirq.T(control_0)
-        yield cirq.T(control_1) ** -1
-        yield cirq.CNOT(control_0, control_1)
+    def toffoli(control_0: 'cirq.Qid', control_1: 'cirq.Qid', target: 'cirq.Qid',
+                exponent: Union[float, sp.Symbol] = 1.):
+        # Taken from the cirq decomposition
+        p = cirq.T**exponent
         yield cirq.H(target)
-        yield cirq.T(control_1)
-        yield cirq.T(target)
-        yield cirq.CNOT(control_0, target)
-        yield cirq.T(target) ** -1
+        yield p(control_0)
+        yield p(control_1)
+        yield p(target)
+        yield cirq.CNOT(control_0, control_1)
         yield cirq.CNOT(control_1, target)
-        yield cirq.T(target)
-        yield cirq.CNOT(control_0, target)
-        yield cirq.T(target) ** -1
+        yield p(control_1)**-1
+        yield p(target)
+        yield cirq.CNOT(control_0, control_1)
+        yield cirq.CNOT(control_1, target)
+        yield p(target)**-1
+        yield cirq.CNOT(control_0, control_1)
+        yield cirq.CNOT(control_1, target)
+        yield p(target)**-1
+        yield cirq.CNOT(control_0, control_1)
         yield cirq.CNOT(control_1, target)
         yield cirq.H(target)
 
