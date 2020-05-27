@@ -7,7 +7,7 @@ from qutrits.qutrit_ops import QutritPlusGate, QutritZPlusGate, QutritMinusGate,
 from qutrits.qutrit_noise import TwoQutritDepolarizingChannel, SingleQutritDepolarizingChannel,\
     two_qutrit_depolarize, qutrit_depolarise
 
-from model_circuits import ModelCircuits
+from circuit_layers import SubCircuits
 
 class TestQutritOps(unittest.TestCase):
     def test_qutrit_circuit(self):
@@ -30,13 +30,13 @@ class TestCircuitModelQutrits(unittest.TestCase):
     def test_qtX(self):
         target = np.array([[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]], dtype=complex)
         q = cirq.LineQubit.range(2)
-        u = cirq.Circuit([ModelCircuits.qutrit_X(q[0], q[1])]).unitary()
+        u = cirq.Circuit([SubCircuits.qutrit_X(q[0], q[1])]).unitary()
         np.testing.assert_array_equal(u, target)
 
     def test_qtX2(self):
         target = np.array([[0, 1, 0, 0], [0, 0, 1, 0], [1, 0, 0, 0], [0, 0, 0, 1]], dtype=complex)
         q = cirq.LineQubit.range(2)
-        u = cirq.Circuit([ModelCircuits.qutrit_X2(q[0], q[1])]).unitary()
+        u = cirq.Circuit([SubCircuits.qutrit_X2(q[0], q[1])]).unitary()
         np.testing.assert_array_equal(u, target)
 
     def test_qtZ(self):
@@ -44,7 +44,7 @@ class TestCircuitModelQutrits(unittest.TestCase):
             [[1, 0, 0, 0], [0, np.exp(2*np.pi*1j/3), 0, 0], [0, 0, np.exp(4*np.pi*1j/3), 0], [0, 0, 0, 1]],
             dtype=complex)
         q = cirq.LineQubit.range(2)
-        u = cirq.Circuit([ModelCircuits.qutrit_Z(q[0], q[1])]).unitary()
+        u = cirq.Circuit([SubCircuits.qutrit_Z(q[0], q[1])]).unitary()
         np.testing.assert_array_equal(u, target)
 
     def test_qtZ2(self):
@@ -52,7 +52,7 @@ class TestCircuitModelQutrits(unittest.TestCase):
             [[1, 0, 0, 0], [0, np.exp(4*np.pi*1j/3), 0, 0], [0, 0, np.exp(2*np.pi*1j/3), 0], [0, 0, 0, 1]],
             dtype=complex)
         q = cirq.LineQubit.range(2)
-        u = cirq.Circuit([ModelCircuits.qutrit_Z2(q[0], q[1])]).unitary()
+        u = cirq.Circuit([SubCircuits.qutrit_Z2(q[0], q[1])]).unitary()
         np.testing.assert_array_equal(u, target)
 
 
