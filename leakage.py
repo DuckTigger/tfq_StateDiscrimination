@@ -4,7 +4,7 @@ import tensorflow as tf
 import cirq
 from math import ceil
 from typing import List
-from model_circuits import ModelCircuits
+from circuit_layers import CircuitLayers
 
 
 class LeakageModels:
@@ -26,8 +26,8 @@ class LeakageModels:
         output = cirq.Circuit()
         for level in range(self.n_layers):
             symbols = sp.symbols('layer{}_0:{}'.format(level, 4 * self.n_layers - level))
-            output += ModelCircuits.create_leakage_layers(self.work_qubits, self.ancilla_qubits, self.readout_qubits,
-                                                          symbols, level, self.constant_leakage)
+            output += CircuitLayers.leakage_qutrit_layers(self.work_qubits, self.ancilla_qubits, self.readout_qubits,
+                                                          level, symbols, False, self.constant_leakage)
         return output
 
     def leaky_model(self, backend: 'cirq.Simulator' = None):
