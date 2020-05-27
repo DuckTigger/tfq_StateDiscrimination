@@ -5,7 +5,7 @@ import tensorflow_quantum as tfq
 import tensorflow as tf
 from typing import Iterable, List, Union
 
-from model_circuits import ModelCircuits
+from circuit_layers import CircuitLayers
 
 
 class EncodeState:
@@ -19,14 +19,14 @@ class EncodeState:
         output = cirq.Circuit()
         for i in range(self.n - self.n_data):
             symbols = sp.symbols('layer{}_0:{}'.format(i, 4 * self.n - i))
-            output.append(ModelCircuits.create_layers(self.qubits, symbols, i, control_on_measurement))
+            output.append(CircuitLayers.create_layers(self.qubits, symbols, i, control_on_measurement))
         return output
 
     def encode_state_PQC(self):
         symbols = sp.symbols('enc0:{}'.format(4 * self.n))
-        encoding_circuit = ModelCircuits.create_encoding_circuit(self.qubits, symbols)
+        encoding_circuit = CircuitLayers.create_encoding_circuit(self.qubits, symbols)
         encoding_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
-        encoding_layer = tfq.layers.AddCircuit()(encoding_input, prepend=ModelCircuits.ent_ops(self.qubits))
+        encoding_layer = tfq.layers.AddCircuit()(encoding_input, prepend=CircuitLayers.ent_ops(self.qubits))
         readout_ops = [cirq.Z(self.qubits[2]), cirq.Z(self.qubits[3])]
         encoding_model = tfq.layers.PQC(encoding_circuit, readout_ops)(encoding_layer)
         return tf.keras.Model(inputs=[encoding_input], outputs=[encoding_model])
@@ -38,11 +38,3 @@ class EncodeState:
         readout_ops = [cirq.Z(qubit) for qubit in measurement_qubits]
         discrimination_pqc = tfq.layers.PQC(discrimination_circuit, readout_ops, backend=backend)(discrimination_input)
         return tf.keras.Model(inputs=[discrimination_input], outputs=[discrimination_pqc])
-
-    def qutrit_model(self, backend: 'Union[cirq.DensityMatrixSimulator, cirq.Simulator]'):
-        input_layer = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
-        qutrit_circuit = self.qutrit_circuit()
-        measurement_qubits = self.qubits[::-1][:-self.n_data] if self.n_data else self.qubits
-        readout_ops = [cirq.Z(qubit) for qubit in measurement_qubits]
-        discrimination_pqc = tfq.layers.PQC(qutrit_circuit, readout_ops, backend=backend)(input_layer)
-        return tf.keras.Model(inputs=[input_layer], outputs=[discrimination_pqc])
