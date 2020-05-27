@@ -4,7 +4,8 @@ import tensorflow as tf
 from math import ceil
 import cirq
 
-from model_circuits import ModelCircuits
+from circuit_layers import CircuitLayers
+
 
 class QutritModel:
 
@@ -19,9 +20,9 @@ class QutritModel:
     def qutrit_discrimination_circuit(self):
         output = cirq.Circuit()
         for level in range(self.n_layers):
-            symbols = sp.symbols('layer{}_0:{}'.format(level, 4 * self.n_layers - level))
-            output += ModelCircuits.craete_qutrit_layers(self.work_qubits, self.ancilla_qubits, self.readout_qubits,
-                                                         symbols, level, self.constant_leakage)
+            symbols = sp.symbols('layer{}_0:{}'.format(level, 9 * self.n_layers - level))
+            output += CircuitLayers.leakage_qutrit_layers(self.work_qubits, self.ancilla_qubits, self.readout_qubits,
+                                                          level, symbols, True, self.constant_leakage)
         return output
 
     def qutrit_model(self, backend: 'cirq.Simulator' = None):
