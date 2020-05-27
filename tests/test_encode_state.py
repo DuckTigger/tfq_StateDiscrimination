@@ -8,7 +8,7 @@ import sympy as sp
 from encode_state import EncodeState
 from leakage import LeakageModels
 from input_circuits import InputCircuits
-from model_circuits import ModelCircuits
+from circuit_layers import CircuitLayers
 
 
 class TestEncodeState(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestEncodeState(unittest.TestCase):
         n = 6
         encoder = EncodeState(n)
         qubits = cirq.GridQubit.rect(int(n/2), 2)
-        test_circuit = ModelCircuits.create_encoding_circuit(qubits)
+        test_circuit = CircuitLayers.create_encoding_circuit(qubits)
         true = cirq.Circuit(
             [cirq.Moment(operations=[
     cirq.H.on(cirq.GridQubit(0, 0)),
@@ -67,7 +67,7 @@ class TestEncodeState(unittest.TestCase):
     def test_one_qubit_unitary(self):
         sym = sp.symbols('0:3')
         qubit = cirq.LineQubit.range(1)[0]
-        unit = ModelCircuits.one_qubit_unitary(qubit, sym)
+        unit = CircuitLayers.one_qubit_unitary(qubit, sym)
         circuit = cirq.Circuit(unit)
         thetas = [np.random.rand() for _ in range(3)]
         test = cirq.Circuit([cirq.X(qubit) ** thetas[0], cirq.Y(qubit) ** thetas[1], cirq.Z(qubit) ** thetas[2]])
@@ -81,7 +81,7 @@ class TestEncodeState(unittest.TestCase):
         encoder = EncodeState(n)
         qubits = cirq.GridQubit.rect(int(n / 2), 2)
         symbols = sp.symbols('enc0:{}'.format(4 * n))
-        circuit = ModelCircuits.create_encoding_circuit(qubits, symbols)
+        circuit = CircuitLayers.create_encoding_circuit(qubits, symbols)
         readout = cirq.PauliString(1, cirq.Z(encoder.qubits[2]), cirq.Z(encoder.qubits[3]))
         enc = tfq.layers.PQC(circuit, readout)
         circuits = InputCircuits(n)
@@ -108,7 +108,7 @@ class TestEncodeState(unittest.TestCase):
         qubits = cirq.GridQubit.rect(int(n / 2), 2)
         for i in range(n):
             symbols = sp.symbols('layer{}_0:{}'.format(i, 4 * n - i))
-            layer = ModelCircuits.create_layers(qubits, symbols, i)
+            layer = CircuitLayers.create_layers(qubits, symbols, i)
             circuit.append(layer)
         print(circuit.to_text_diagram(transpose=True))
         true = cirq.Circuit(
@@ -246,7 +246,7 @@ class TestEncodeState(unittest.TestCase):
         qubits = cirq.GridQubit.rect(int(n / 2), 2)
         for i in range(n):
             symbols = sp.symbols('layer{}_0:{}'.format(1, 4 * n - i))
-            layer = ModelCircuits.create_layers(qubits, symbols, i, True)
+            layer = CircuitLayers.create_layers(qubits, symbols, i, True)
             circuit.append(layer)
         true = cirq.Circuit(
             [[cirq.Moment(operations=[

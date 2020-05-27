@@ -4,7 +4,7 @@ import sympy as sp
 import cirq
 import tensorflow_quantum as tfq
 
-from model_circuits import ModelCircuits
+from circuit_layers import CircuitLayers
 from leakage import LeakageModels
 
 
@@ -19,7 +19,7 @@ class TestLeakageCircuits(unittest.TestCase):
         circuit = cirq.Circuit()
         for level in range(len(work)):
             symbols = sp.symbols('layer{}_0:{}'.format(level, 4 * n_work - level))
-            circuit += ModelCircuits.create_leakage_layers(work, ancilla, readout, symbols, level)
+            circuit += CircuitLayers.leakage_qutrit_layers(work, ancilla, readout, level, symbols, False)
         hard_coded = cirq.Circuit([
                 cirq.Moment(operations=[
                 (cirq.X ** sp.Symbol('layer0_0')).on(cirq.LineQubit(0)),
