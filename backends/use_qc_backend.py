@@ -1,9 +1,6 @@
 import cirq
-import pytket
-import qiskit
 import numpy as np
 from pytket.backends.ibm import IBMQBackend, AerBackend
-import tensorflow_quantum as tfq
 from typing import List, Dict
 from cirq import study, protocols
 from cirq.sim.simulator import _verify_unique_measurement_keys
@@ -13,8 +10,13 @@ from cirq_convert import cirq_to_tk
 
 class QCBackend(cirq.Sampler):
 
-    def init(self):
-        self.backend = AerBackend()
+    def __init__(self,
+                 backend_name: str = None
+                 ):
+        if backend_name is None:
+            self.backend = AerBackend()
+        else:
+            self.backend = IBMQBackend(backend_name)
 
     def run_sweep(
             self,
@@ -43,8 +45,19 @@ class QCBackend(cirq.Sampler):
                         repetitions: int
                             ) -> Dict[str, np.ndarray]:
         resolved = protocols.resolve_parameters(circuit, param_resolver)
-        measurement_keys = circuit.all_measurement_keys()
+        measurements = {}
         to_tket = cirq_to_tk(resolved)
-        res = self.backend.get_shots(to_tket, repetitions)
+        self.backend.compile_circuit(to_tket)
+        res = self.backend.process_circuit(to_tket, repetitions)
+        shots = self.backend.get_shots(res)
+        for i, measure in enumerate(shots):
+            measurements[str(i)] = np.array(measure, dtype=np.uint8)
+
+        return measurements
 
 
+if __name__ == '__main__':
+     to_qc = QCBackend('ibmq_essex')
+     q = cirq.LineQubit.range(2)
+     circuit = cirq.Circuit([cirq.H(q[0]), cirq.CNOT(*q), cirq.measure(q[0], key='m0'), cirq.measure(q[1], key='m1')])
+     print(to_qc.run_sweep(circuit, {}, 10))
