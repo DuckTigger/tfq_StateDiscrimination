@@ -108,6 +108,7 @@ def cirq_to_tk(circuit: cirq.Circuit) -> Circuit:
         qmap.update({qb: id})
     for moment in circuit:
         for op in moment.operations:
+            measurement_index = 0
             gate = op.gate
             gatetype = type(gate)
 
@@ -136,9 +137,10 @@ def cirq_to_tk(circuit: cirq.Circuit) -> Circuit:
                     ) from error
                 params = []
             elif isinstance(gate, cirq_common.MeasurementGate):
-                id = Bit(gate.key)
+                id = Bit(gate.key, index=measurement_index)
                 tkcirc.add_bit(id)
                 tkcirc.Measure(*qb_lst, id)
+                measurement_index += 1
                 continue
             elif isinstance(gate, cirq.PhasedXPowGate):
                 optype = OpType.PhasedX
@@ -151,7 +153,7 @@ def cirq_to_tk(circuit: cirq.Circuit) -> Circuit:
                 decomp_gate = OpType.Ry
                 decomp_param = [0.5]
                 decomp_qubit = [qmap[op.qubits[-1]]]
-                tkcirc.add_gate(decomp_gate, [-0.5], decomp_qubit)
+                tkcirc.add_gate(decomp_gate, [-1 * x for x in decomp_param], decomp_qubit)
             else:
                 try:
                     optype = _cirq2ops_mapping[gatetype]
