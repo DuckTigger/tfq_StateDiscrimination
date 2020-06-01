@@ -95,11 +95,12 @@ def cirq_to_tk(circuit: cirq.Circuit) -> Circuit:
     """
     tkcirc = Circuit()
     qmap = {}
-    for qb in circuit.all_qubits():
+    # Hack as Qiskit can't handle qubits with multiple registers
+    for i, qb in enumerate(circuit.all_qubits()):
         if isinstance(qb, LineQubit):
             id = Qubit("q", qb.x)
         elif isinstance(qb, GridQubit):
-            id = Qubit("g", qb.row, qb.col)
+            id = Qubit("g", i)
         elif isinstance(qb, NamedQubit):
             id = Qubit(qb.name)
         else:

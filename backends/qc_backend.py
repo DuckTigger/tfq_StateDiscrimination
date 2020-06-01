@@ -45,13 +45,13 @@ class QCBackend(cirq.Sampler):
                         repetitions: int
                             ) -> Dict[str, np.ndarray]:
         resolved = protocols.resolve_parameters(circuit, param_resolver)
-        measurements = {}
+        measurements = {'out': np.array([], dtype=np.uint8)}
         to_tket = cirq_to_tk(resolved)
         self.backend.compile_circuit(to_tket)
         res = self.backend.process_circuit(to_tket, repetitions)
         shots = self.backend.get_shots(res)
-        for i, measure in enumerate(shots):
-            measurements[str(i)] = np.array(measure, dtype=np.uint8)
+        for measure in shots:
+            measurements['out'] = np.append(measurements['out'], measure)
 
         return measurements
 
