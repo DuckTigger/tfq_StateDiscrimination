@@ -3,6 +3,7 @@ import tensorflow_quantum as tfq
 import tensorflow as tf
 from math import ceil
 import cirq
+from typing import Union
 
 from circuit_layers import CircuitLayers
 
@@ -25,9 +26,9 @@ class QutritModel:
                                                           level, symbols, True, self.constant_leakage)
         return output
 
-    def qutrit_model(self, backend: 'cirq.Simulator' = None):
+    def qutrit_model(self, backend: 'Union[cirq.SimulatesFinalState, cirq.Sampler]' = None, repetitions: int = None):
         circuit_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
         qutrit_circuit = self.qutrit_discrimination_circuit()
         readout_ops = [cirq.Z(q) for q in self.readout_qubits]
-        qutrit_pqc = tfq.layers.PQC(qutrit_circuit, readout_ops, backend=backend)(circuit_input)
+        qutrit_pqc = tfq.layers.PQC(qutrit_circuit, readout_ops, backend=backend, repetitions=repetitions)(circuit_input)
         return tf.keras.Model(inputs=[circuit_input], outputs=[qutrit_pqc])

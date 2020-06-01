@@ -30,9 +30,9 @@ class LeakageModels:
                                                           level, symbols, False, self.constant_leakage)
         return output
 
-    def leaky_model(self, backend: 'cirq.Simulator' = None):
+    def leaky_model(self, backend: 'cirq.Simulator' = None, repetitions: int = None):
         circuit_input = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
         leaky_circuit = self.leaky_discrimination_circuit()
         readout_ops = [cirq.Z(q) for q in self.readout_qubits]
-        leaky_pqc = tfq.layers.PQC(leaky_circuit, readout_ops, backend=backend)(circuit_input)
+        leaky_pqc = tfq.layers.PQC(leaky_circuit, readout_ops, backend=backend, repetitions=repetitions)(circuit_input)
         return tf.keras.Model(inputs=[circuit_input], outputs=[leaky_pqc])
