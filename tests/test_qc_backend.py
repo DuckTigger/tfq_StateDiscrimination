@@ -39,16 +39,13 @@ class TestAerBackend(unittest.TestCase):
         input_circuits = tfq.convert_to_tensor([cirq.Circuit([cirq.Z(q[1])]), cirq.Circuit([cirq.X(q[1])])])
         expected = np.array([[-1], [1]], dtype=np.float32)
         loss = tf.keras.losses.MeanSquaredError()
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss=loss)
         model([input_circuits]).numpy()
-
-        # model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss=loss)
-        #
         # history = model.fit(x=input_circuits,
         #           y=expected,
         #           batch_size=2,
         #           epochs=2,
-        #           verbose=1)
-
+        #           verbose=1, max_queue_size=1, use_multiprocessing=False)
 
 
 if __name__ == '__main__':
