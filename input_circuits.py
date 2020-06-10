@@ -23,6 +23,10 @@ class InputCircuits:
         circuits, labels = self.random_circuits_labels(total_states, lower, upper, mu_a, sigma_a)
         return self.return_tensors(circuits, labels)
 
+    def create_dmft_circuits(self, total_states: int = 1000):
+        circuits, labels = self.dmft_circuits_labels(total_states)
+        return self.return_tensors(circuits, labels)
+
     def discrimination_circuits_labels(self, total_states: int = 1000,
                                      mu_a: float = 0.5, mu_b: float = 0.5, sigma_a: float = 0.01,
                                      sigma_b: float = 0.01):
@@ -77,11 +81,8 @@ class InputCircuits:
         circuit = cirq.Circuit(ops)
         return circuit
 
-    def create_random_circuits(self, total_states: int = 1000, lower: int = 0, upper: int = 1,
-                               mu_a: float = 0.5, sigma_a: float = 0.15):
-        circuits, labels = self.random_circuits_labels(total_states, lower, upper, mu_a, sigma_a)
-        return self.return_tensors(circuits, labels)
-
+    def dmft_circuits_labels(self, total_states: int = 1000):
+        pass
 
     @staticmethod
     def return_tensors(circuits: List, labels: List):
