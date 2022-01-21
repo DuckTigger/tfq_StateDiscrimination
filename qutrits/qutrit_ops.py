@@ -4,6 +4,7 @@ import sympy as sp
 from cirq.ops import gate_features, eigen_gate
 from sympy.physics.quantum import TensorProduct
 
+
 class QutritPlusGate(eigen_gate.EigenGate, gate_features.SingleQubitGate):
     def _qid_shape_(self):
         return (3,)
